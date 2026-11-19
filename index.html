@@ -146,10 +146,15 @@
 
 <main>
   <div class="controls">
-    <select id="reciter" aria-label="القارئ"></select>
-    <select id="riwaya" aria-label="الرواية"></select>
-    <input id="search" placeholder="ابحث عن سورة..." aria-label="بحث">
-  </div>
+  <input id="reciterSearch" type="search"
+    placeholder="🔍 ابحث عن القارئ...">
+
+  <select id="reciter" aria-label="القارئ"></select>
+
+  <select id="riwaya" aria-label="الرواية"></select>
+
+  <input id="search" placeholder="ابحث عن سورة..." aria-label="بحث">
+</div>
   <div id="msg">جاري التحميل...</div>
   <div id="list"></div>
   <p class="credit">تصميم محمد تامر</p>
@@ -277,8 +282,29 @@ async function start() {
     });
 
     $("reciter").innerHTML = reciters.map((c, i) =>
-      `<option value="${i}">${c.name}</option>`
-    ).join("");
+  `<option value="${i}">${c.name}</option>`
+).join("");
+
+$("reciterSearch").oninput = function () {
+  const q = this.value.trim().toLowerCase();
+
+  const filtered = reciters
+    .map((c, i) => ({ name: c.name, index: i }))
+    .filter(c => c.name.toLowerCase().includes(q));
+
+  $("reciter").innerHTML = filtered.map(c =>
+    `<option value="${c.index}">${c.name}</option>`
+  ).join("");
+
+  if (filtered.length > 0) {
+    $("reciter").value = filtered[0].index;
+    chooseReciter();
+  } else {
+    $("riwaya").innerHTML = "";
+    $("list").innerHTML = "";
+    $("msg").textContent = "لم يتم العثور على قارئ بهذا الاسم.";
+  }
+};
 
     $("msg").textContent = "";
     chooseReciter();
