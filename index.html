@@ -255,21 +255,40 @@
     )
   });
 
-  async function start() {
-    try {
-      const [r, s] = await Promise.all([
-        fetch(API + "reciters?language=ar").then(x => x.json()),
-        fetch(API + "suwar?language=ar").then(x => x.json())
-      ]);
-      reciters = r.reciters;
-      suwar = s.suwar;
-      $("reciter").innerHTML = reciters.map((c, i) => `<option value="${i}">${c.name}</option>`).join("");
-      $("msg").textContent = "";
-      chooseReciter();
-    } catch (e) {
-      $("msg").textContent = "تعذّر تحميل البيانات. تأكد من اتصال الإنترنت وأعد فتح الصفحة.";
-    }
+  
+async function start() {
+  try {
+    const [r, s] = await Promise.all([
+      fetch(API + "reciters?language=ar").then(x => x.json()),
+      fetch(API + "suwar?language=ar").then(x => x.json())
+    ]);
+
+    reciters = r.reciters;
+    suwar = s.suwar;
+
+    // تقديم إسلام صبحي في قائمة القراء
+    reciters.sort((a, b) => {
+      const aIslam = a.name.includes("إسلام صبحي");
+      const bIslam = b.name.includes("إسلام صبحي");
+
+      if (aIslam && !bIslam) return -1;
+      if (!aIslam && bIslam) return 1;
+      return 0;
+    });
+
+    $("reciter").innerHTML = reciters.map((c, i) =>
+      `<option value="${i}">${c.name}</option>`
+    ).join("");
+
+    $("msg").textContent = "";
+    chooseReciter();
+
+  } catch (e) {
+    $("msg").textContent =
+      "تعذّر تحميل البيانات. تأكد من اتصال الإنترنت وأعد فتح الصفحة.";
   }
+}
+
 
   function chooseReciter() {
     const c = reciters[$("reciter").value];
